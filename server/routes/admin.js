@@ -22,9 +22,13 @@ router.delete('/users/:id', auth, isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    await User.findByIdAndRemove(req.params.id);
+    const result = await User.findByIdAndDelete(req.params.id);
 
-    res.json({ message: 'User removed' });
+    if (!result) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.status(200).json({ message: 'User removed' });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
