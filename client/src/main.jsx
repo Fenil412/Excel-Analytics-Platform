@@ -6,6 +6,12 @@ import { AuthProvider } from "./contexts/AuthContext"
 import { ThemeProvider } from "./contexts/ThemeContext"
 import "./index.css"
 
+// Add axios configuration globally
+import axios from "axios"
+
+// Set default axios configuration
+axios.defaults.headers.common["Content-Type"] = "application/json"
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>

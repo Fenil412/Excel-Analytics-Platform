@@ -2,8 +2,11 @@ import { Routes, Route } from "react-router-dom"
 import HomePage from "./pages/HomePage"
 import SignInPage from "./pages/SignInPage"
 import SignUpPage from "./pages/SignUpPage"
-import VerifyOtpPage from "./pages/VerifyOtpPage"
+import DashboardPage from "./pages/DashboardPage"
+import AdminPage from "./pages/AdminPage"
 import NotFoundPage from "./pages/NotFoundPage"
+import ProtectedRoute from "./components/ProtectedRoute"
+import AdminRoute from "./components/AdminRoute"
 
 function App() {
   return (
@@ -12,9 +15,23 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
-        <Route path="/verify-otp" element={<VerifyOtpPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminPage />
+            </AdminRoute>
+          }
+        />
 
-        
         {/* 404 Page */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

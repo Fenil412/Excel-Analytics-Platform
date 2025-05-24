@@ -2,15 +2,18 @@ import { createContext, useContext, useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001"
+
+// Add axios configuration
+axios.defaults.baseURL = API_URL
+axios.defaults.timeout = 10000
+
 const AuthContext = createContext()
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [token, setToken] = useState(localStorage.getItem("token") || null)
   const [loading, setLoading] = useState(true)
-  const [requiresTwoFactor, setRequiresTwoFactor] = useState(false)
-  const [tempCredentials, setTempCredentials] = useState(null)
 
   const navigate = useNavigate()
 
@@ -42,9 +45,9 @@ export function AuthProvider({ children }) {
           return
         }
 
-        // Verify token with backend
-        const response = await axios.get(`${API_URL}/api/auth/verify`)
-        setUser(response.data.user)
+        // Get user profile to verify token
+        const response = await axios.get(`${API_URL}/api/user/profile`)
+        setUser(response.data)
       } catch (error) {
         console.error("Token verification failed:", error)
         logout()
@@ -67,17 +70,14 @@ export function AuthProvider({ children }) {
 
   const login = async (credentials) => {
     try {
-      const response = await axios.post(`${API_URL}/api/auth/login`, credentials)
+      console.log("Attempting login with:", credentials)
+      console.log("API URL:", API_URL)
 
-      // Check if 2FA is required
-      if (response.data.requiresTwoFactor) {
-        setRequiresTwoFactor(true)
-        setTempCredentials(credentials)
-        return { success: true, requiresTwoFactor: true }
-      }
+      const response = await axios.post("/api/auth/login", credentials)
+      console.log("Login response:", response.data)
 
-      // Normal login flow
       const { token, user } = response.data
+
       setToken(token)
       setUser(user)
       localStorage.setItem("token", token)
@@ -85,6 +85,7 @@ export function AuthProvider({ children }) {
       return { success: true }
     } catch (error) {
       console.error("Login failed:", error)
+      console.error("Error response:", error.response?.data)
       return {
         success: false,
         message: error.response?.data?.message || "Login failed. Please try again.",
@@ -92,36 +93,15 @@ export function AuthProvider({ children }) {
     }
   }
 
-  const verifyOtp = async (otp) => {
-    try {
-      const response = await axios.post(`${API_URL}/api/auth/verify-otp`, {
-        ...tempCredentials,
-        otp,
-      })
-
-      const { token, user } = response.data
-      setToken(token)
-      setUser(user)
-      localStorage.setItem("token", token)
-      setRequiresTwoFactor(false)
-      setTempCredentials(null)
-
-      return { success: true }
-    } catch (error) {
-      console.error("OTP verification failed:", error)
-      return {
-        success: false,
-        message: error.response?.data?.message || "OTP verification failed. Please try again.",
-      }
-    }
-  }
-
   const register = async (userData) => {
     try {
-      const response = await axios.post(`${API_URL}/api/auth/register`, userData)
-      return { success: true, message: response.data.message }
+      console.log("Attempting registration with:", userData)
+      const response = await axios.post("/api/auth/register", userData)
+      console.log("Registration response:", response.data)
+      return { success: true, message: "Account created successfully. Please sign in." }
     } catch (error) {
       console.error("Registration failed:", error)
+      console.error("Error response:", error.response?.data)
       return {
         success: false,
         message: error.response?.data?.message || "Registration failed. Please try again.",
@@ -136,9 +116,18 @@ export function AuthProvider({ children }) {
     navigate("/signin")
   }
 
-  const oauthLogin = async (provider) => {
-    // Open OAuth provider login window
-    window.open(`${API_URL}/api/auth/${provider}`, "_self")
+  const updateProfile = async (profileData) => {
+    try {
+      const response = await axios.put(`${API_URL}/api/user/profile`, profileData)
+      setUser(response.data)
+      return { success: true, message: "Profile updated successfully." }
+    } catch (error) {
+      console.error("Profile update failed:", error)
+      return {
+        success: false,
+        message: error.response?.data?.message || "Profile update failed. Please try again.",
+      }
+    }
   }
 
   return (
@@ -147,12 +136,10 @@ export function AuthProvider({ children }) {
         user,
         token,
         loading,
-        requiresTwoFactor,
         login,
         register,
         logout,
-        verifyOtp,
-        oauthLogin,
+        updateProfile,
         isAuthenticated: !!user,
         isAdmin: user?.role === "admin",
       }}
