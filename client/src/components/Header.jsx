@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import { useTheme } from "../contexts/ThemeContext"
 import { Moon, Sun, Menu, X } from "lucide-react"
+import logo from "../../photos/excel.png"
 
 const Header = () => {
   const { isAuthenticated, isAdmin, user, logout } = useAuth()
@@ -22,9 +23,13 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
-          <Link to="/" className="text-xl font-bold">
-            SecureApp
-          </Link>
+          <Link to="/" className="flex items-center">
+              <img
+                src={logo}
+                className="h-14 mt-1 sm:h-13 mr-2 sm:mr-3 invert"
+                alt="Logo"
+              />
+            </Link>
         </div>
 
         {/* Desktop Navigation */}

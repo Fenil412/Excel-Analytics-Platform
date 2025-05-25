@@ -58,8 +58,8 @@ const Footer = () => {
 
           <div className="space-y-3">
             <h3 className="text-lg font-semibold">Contact</h3>
-            <p className="text-sm text-muted-foreground">Email: support@secureapp.com</p>
-            <p className="text-sm text-muted-foreground">Phone: +1 (555) 123-4567</p>
+            <p className="text-sm text-muted-foreground">Email: support@datalytics.com</p>
+            <p className="text-sm text-muted-foreground">Phone: +91 99133 60515</p>
           </div>
         </div>
 
