@@ -11,6 +11,7 @@ const SignUpPage = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    role:"",
   })
   const [isLoading, setIsLoading] = useState(false)
 
@@ -154,6 +155,21 @@ const SignUpPage = () => {
                 type="password"
                 placeholder="••••••••"
                 value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label htmlFor="role" className="block text-sm font-medium">
+                Role
+              </label>
+              <input
+                id="role"
+                name="role"
+                placeholder="User"
+                value={formData.role}
                 onChange={handleChange}
                 required
                 className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
