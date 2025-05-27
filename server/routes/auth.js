@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const sendMail = require('../utils/mailer');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
@@ -27,6 +28,12 @@ router.post('/register', async (req, res) => {
 
         await user.save();
 
+        await sendMail(
+            email,
+            "Welcome to Excel Analytics Platform",
+            `<h3>Hello ${username},</h3><p>Thanks for Register with us.</p>`
+        );
+
         const payload = {
             user: {
                 id: user.id,
@@ -43,6 +50,7 @@ router.post('/register', async (req, res) => {
                 res.json({ token });
             }
         );
+
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
@@ -57,6 +65,12 @@ router.post('/login', async (req, res) => {
         if (!user) {
             return res.status(400).json({ message: 'User not Found.' });
         }
+
+        await sendMail(
+            email,
+            "Welcome to Excel Analytics Platform",
+            '<h3>Hello User </h3><p>Thanks for log in with us.</p>'
+        );
 
         let isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
@@ -87,6 +101,8 @@ router.post('/login', async (req, res) => {
                 });
             }
         );
+
+
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
