@@ -1,12 +1,13 @@
-import { Routes, Route } from "react-router-dom"
-import HomePage from "./pages/HomePage"
-import SignInPage from "./pages/SignInPage"
-import SignUpPage from "./pages/SignUpPage"
-import DashboardPage from "./pages/DashboardPage"
-import AdminPage from "./pages/AdminPage"
-import NotFoundPage from "./pages/NotFoundPage"
-import ProtectedRoute from "./components/ProtectedRoute"
-import AdminRoute from "./components/AdminRoute"
+import { Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import SignInPage from "./pages/SignInPage";
+import SignUpPage from "./pages/SignUpPage";
+import DashboardPage from "./pages/DashboardPage";
+import AdminPage from "./pages/AdminPage";
+import NotFoundPage from "./pages/NotFoundPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
+import VerifyOtpPage from "./pages/VerifyOtpPage";
 
 function App() {
   return (
@@ -15,6 +16,9 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/verify-otp" element={<VerifyOtpPage />} />
+
+        {/* Protected Routes */}
         <Route
           path="/dashboard"
           element={
@@ -36,7 +40,7 @@ function App() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

@@ -10,54 +10,44 @@ const SignInPage = () => {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
-  const { login } = useAuth()
+  const { login} = useAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    console.log("Form submitted with:", { email, password })
+    e.preventDefault();
 
     if (!email || !password) {
-      toast({
+      return toast({
         variant: "destructive",
         title: "Error",
         description: "Please fill in all fields.",
-      })
-      return
+      });
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
-    try {
-      const result = await login({ email, password })
-      console.log("Login result:", result)
+    const result = await login({ email, password });
 
-      if (result.success) {
-        toast({
-          title: "Success",
-          description: "You have successfully signed in.",
-        })
-        navigate("/dashboard")
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: result.message,
-        })
-      }
-    } catch (error) {
-      console.error("Login error:", error)
+    setIsLoading(false);
+
+    if (result.success) return; // not expected in OTP flow
+
+    if (result.requiresOtp) {
+      toast({
+        title: "OTP Sent",
+        description: "Check your email for the OTP.",
+      });
+      navigate("/verify-otp");
+    } else {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-      })
-    } finally {
-      setIsLoading(false)
+        title: "Login Failed",
+        description: result.message,
+      });
     }
-  }
-
+  };
+  
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -66,12 +56,14 @@ const SignInPage = () => {
         <div className="w-full max-w-md px-6 py-8 border rounded-lg shadow-md bg-white">
           <header className="space-y-1 mb-6">
             <h1 className="text-2xl font-bold text-center">Sign In</h1>
-            <p className="text-center text-gray-600">Enter your credentials to access your account</p>
+            <p className="text-center text-gray-600">
+              Enter your credentials to access your account
+            </p>
           </header>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1">
-              <label htmlFor="email" className="block text-sm font-medium">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium mb-1">
                 Email
               </label>
               <input
@@ -85,8 +77,8 @@ const SignInPage = () => {
               />
             </div>
 
-            <div className="space-y-1">
-              <label htmlFor="password" className="block text-sm font-medium">
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium mb-1">
                 Password
               </label>
               <input
@@ -112,7 +104,7 @@ const SignInPage = () => {
           </form>
 
           <footer className="mt-6 text-center text-sm text-gray-600">
-            Don't have an account?{" "}
+            Don’t have an account?{" "}
             <Link to="/signup" className="text-blue-600 hover:underline">
               Sign up
             </Link>
