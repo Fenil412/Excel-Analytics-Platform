@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../components/ui/use-toast";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import { Eye, EyeOff } from "lucide-react";
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +13,8 @@ const SignUpPage = () => {
     role: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { register } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -86,8 +86,6 @@ const SignUpPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
-
       <main className="flex-1 flex items-center justify-center py-12">
         <div className="w-full max-w-md px-6 py-8 border rounded-lg shadow-md bg-white">
           <header className="space-y-1 mb-6">
@@ -136,17 +134,30 @@ const SignUpPage = () => {
               <label htmlFor="password" className="block text-sm font-medium">
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                minLength={6}
-                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  minLength={6}
+                  className="w-full px-3 py-2 border rounded pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               <p className="text-xs text-gray-500">
                 Password must be at least 6 characters long
               </p>
@@ -159,16 +170,29 @@ const SignUpPage = () => {
               >
                 Confirm Password
               </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2 border rounded pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="space-y-1">
@@ -209,8 +233,6 @@ const SignUpPage = () => {
           </footer>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

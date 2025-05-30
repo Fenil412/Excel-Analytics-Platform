@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../components/ui/use-toast";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+
 
 const VerifyOtpPage = () => {
   const [otp, setOtp] = useState("");
@@ -33,7 +32,6 @@ const VerifyOtpPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
       <main className="flex-1 flex items-center justify-center py-12">
         <div className="w-full max-w-md bg-white border p-6 rounded shadow">
           <h1 className="text-2xl font-bold text-center mb-4">Verify OTP</h1>
@@ -58,7 +56,6 @@ const VerifyOtpPage = () => {
           </form>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

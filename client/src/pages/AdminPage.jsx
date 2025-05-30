@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../contexts/AuthContext"
 import { useToast } from "../components/ui/use-toast"
-import Header from "../components/Header"
-import Footer from "../components/Footer"
 import { Users, Trash2, Shield } from "lucide-react"
 import axios from "axios"
 
@@ -92,21 +90,18 @@ const AdminPage = () => {
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen">
-        <Header />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-600">Loading admin dashboard...</p>
           </div>
         </main>
-        <Footer />
       </div>
     )
   }
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
 
       <main className="flex-1 py-8">
         <div className="container mx-auto px-4">
@@ -241,7 +236,6 @@ const AdminPage = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   )
 }

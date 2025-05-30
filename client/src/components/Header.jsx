@@ -42,6 +42,15 @@ const Header = () => {
               <Link to="/dashboard" className="text-sm font-medium hover:text-primary">
                 Dashboard
               </Link>
+              <Link to="/upload" className="text-sm font-medium hover:text-primary">
+                Upload
+              </Link>
+              <Link to="/analytics" className="text-sm font-medium hover:text-primary">
+                Analytics
+              </Link>
+              <Link to="/settings" className="text-sm font-medium hover:text-primary">
+                Settings
+              </Link>
               {isAdmin && (
                 <Link to="/admin" className="text-sm font-medium hover:text-primary">
                   Admin
@@ -89,6 +98,15 @@ const Header = () => {
               <>
                 <Link to="/dashboard" className="text-sm font-medium hover:text-primary" onClick={toggleMenu}>
                   Dashboard
+                </Link>
+                <Link to="/upload" className="text-sm font-medium hover:text-primary" onClick={toggleMenu}>
+                  Upload
+                </Link>
+                <Link to="/analytics" className="text-sm font-medium hover:text-primary" onClick={toggleMenu}>
+                  Analytics
+                </Link>
+                <Link to="/settings" className="text-sm font-medium hover:text-primary" onClick={toggleMenu}>
+                  Settings
                 </Link>
                 {isAdmin && (
                   <Link to="/admin" className="text-sm font-medium hover:text-primary" onClick={toggleMenu}>

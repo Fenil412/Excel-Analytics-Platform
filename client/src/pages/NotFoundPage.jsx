@@ -1,11 +1,8 @@
 import { Link } from "react-router-dom"
-import Header from "../components/Header"
-import Footer from "../components/Footer"
 
 const NotFoundPage = () => {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
 
       <main className="flex-1 flex items-center justify-center">
         <div className="container flex flex-col items-center justify-center px-5 text-center">
@@ -18,7 +15,6 @@ const NotFoundPage = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   )
 }

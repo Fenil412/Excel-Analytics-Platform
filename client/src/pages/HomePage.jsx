@@ -1,14 +1,11 @@
 import { Link } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
-import Header from "../components/Header"
-import Footer from "../components/Footer"
 
 const HomePage = () => {
   const { isAuthenticated } = useAuth()
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
 
       <main className="flex-1">
         {/* Hero Section */}
@@ -134,7 +131,6 @@ const HomePage = () => {
         </section>
       </main>
 
-      <Footer />
     </div>
   )
 }
