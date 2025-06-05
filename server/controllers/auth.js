@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const sendMail = require('../utils/mailer');
-const sendOtp = require("../utils/sendOtp");
 const otpStore = {};
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
@@ -74,7 +73,12 @@ exports.login = async (req, res) => {
         // Generate and send OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         otpStore[email] = otp;
-        await sendOtp(email, otp);
+        await sendMail(
+            email,
+            "Your OTP Code",
+            `Your OTP is: ${otp}`
+        );
+
 
         // Return response that OTP is required
         return res.status(200).json({

@@ -16,7 +16,6 @@ import AdminRoute from "./components/AdminRoute";
 import AdminPage from "./pages/AdminPage";
 
 // Dashboard layout pages
-import Navbar from "./pages/Layout/Navbar";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import FileUpload from "./pages/Upload/FileUpload";
 import Analytics from "./pages/Analytics/Analytics";
