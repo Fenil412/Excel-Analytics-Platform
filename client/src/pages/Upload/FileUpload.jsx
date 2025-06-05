@@ -1,11 +1,16 @@
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import { Upload, X, CheckCircle, AlertCircle, FileSpreadsheet, Loader } from "lucide-react"
+import { useExcel } from "../../contexts/ExcelContext"
 
 const FileUpload = () => {
   const [files, setFiles] = useState([])
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState({})
+  const { uploadFile, error, clearError } = useExcel()
+
+  // Get username from localStorage or context (adjust based on your auth implementation)
+  const username = localStorage.getItem('username') || 'demo_user'
 
   const onDrop = useCallback((acceptedFiles) => {
     const newFiles = acceptedFiles.map((file) => ({
@@ -32,41 +37,50 @@ const FileUpload = () => {
     setFiles((prev) => prev.filter((f) => f.id !== id))
   }
 
+  const uploadSingleFile = async (fileItem) => {
+    try {
+      // Update status to uploading
+      setFiles((prev) => prev.map((f) => (f.id === fileItem.id ? { ...f, status: "uploading" } : f)))
+
+      // Simulate progress for UI feedback
+      let progress = 0
+      const progressInterval = setInterval(() => {
+        progress += Math.random() * 20
+        if (progress < 90) {
+          setUploadProgress((prev) => ({ ...prev, [fileItem.id]: progress }))
+        }
+      }, 200)
+
+      // Upload the file
+      const result = await uploadFile(fileItem.file, username)
+      
+      // Complete progress
+      clearInterval(progressInterval)
+      setUploadProgress((prev) => ({ ...prev, [fileItem.id]: 100 }))
+
+      // Update status to uploaded
+      setFiles((prev) => prev.map((f) => (f.id === fileItem.id ? { ...f, status: "uploaded", result } : f)))
+      
+      return result
+    } catch (error) {
+      setFiles((prev) =>
+        prev.map((f) => (f.id === fileItem.id ? { ...f, status: "error", error: error.message } : f)),
+      )
+      throw error
+    }
+  }
+
   const uploadFiles = async () => {
     setUploading(true)
+    clearError()
 
-    for (const fileItem of files) {
-      if (fileItem.status === "uploaded") continue
-
+    const pendingFiles = files.filter(f => f.status === "pending")
+    
+    for (const fileItem of pendingFiles) {
       try {
-        // Update status to uploading
-        setFiles((prev) => prev.map((f) => (f.id === fileItem.id ? { ...f, status: "uploading" } : f)))
-
-        const formData = new FormData()
-        formData.append("file", fileItem.file)
-
-        // Simulate upload progress
-        const uploadPromise = new Promise((resolve) => {
-          let progress = 0
-          const interval = setInterval(() => {
-            progress += Math.random() * 30
-            if (progress >= 100) {
-              progress = 100
-              clearInterval(interval)
-              resolve()
-            }
-            setUploadProgress((prev) => ({ ...prev, [fileItem.id]: progress }))
-          }, 200)
-        })
-
-        await uploadPromise
-
-        // Update status to uploaded
-        setFiles((prev) => prev.map((f) => (f.id === fileItem.id ? { ...f, status: "uploaded" } : f)))
+        await uploadSingleFile(fileItem)
       } catch (error) {
-        setFiles((prev) =>
-          prev.map((f) => (f.id === fileItem.id ? { ...f, status: "error", error: error.message } : f)),
-        )
+        console.error(`Failed to upload ${fileItem.file.name}:`, error)
       }
     }
 
@@ -81,6 +95,11 @@ const FileUpload = () => {
     return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
   }
 
+  // Clear global error when component unmounts
+  useEffect(() => {
+    return () => clearError()
+  }, [clearError])
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -90,6 +109,22 @@ const FileUpload = () => {
           Upload your Excel files for analysis. Supported formats: .xlsx, .xls, .csv
         </p>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <div className="flex items-center">
+            <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+            <p className="text-red-700 dark:text-red-400">{error}</p>
+            <button 
+              onClick={clearError}
+              className="ml-auto text-red-500 hover:text-red-700"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Upload Area */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
@@ -124,7 +159,7 @@ const FileUpload = () => {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Selected Files ({files.length})</h3>
               <button
                 onClick={uploadFiles}
-                disabled={uploading || files.every((f) => f.status === "uploaded")}
+                disabled={uploading || files.every((f) => f.status === "uploaded" || f.status === "uploading")}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {uploading ? (
@@ -166,6 +201,13 @@ const FileUpload = () => {
                       </div>
                     )}
 
+                    {/* Success Message */}
+                    {fileItem.status === "uploaded" && fileItem.result && (
+                      <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                        Uploaded successfully • {fileItem.result.sheetNames?.length || 0} sheets detected
+                      </p>
+                    )}
+
                     {/* Error Message */}
                     {fileItem.error && <p className="text-xs text-red-500 mt-1">{fileItem.error}</p>}
                   </div>
@@ -180,7 +222,8 @@ const FileUpload = () => {
                   {/* Remove Button */}
                   <button
                     onClick={() => removeFile(fileItem.id)}
-                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                    disabled={fileItem.status === "uploading"}
+                    className="p-1 text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50"
                   >
                     <X className="h-4 w-4" />
                   </button>

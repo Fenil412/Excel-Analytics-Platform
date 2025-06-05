@@ -8,7 +8,7 @@ const Footer = () => {
       <div className="container py-8 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold">SecureApp</h3>
+            <h3 className="text-lg font-semibold">Datalytics</h3>
             <p className="text-sm text-muted-foreground">
               Secure authentication and dashboard solution for your applications.
             </p>
@@ -64,7 +64,7 @@ const Footer = () => {
         </div>
 
         <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>© {currentYear} SecureApp. All rights reserved.</p>
+          <p>© {currentYear} Datalytics. All rights reserved.</p>
         </div>
       </div>
     </footer>

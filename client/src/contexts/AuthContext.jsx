@@ -2,10 +2,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
-
 // Add axios configuration
-axios.defaults.baseURL = API_URL;
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 axios.defaults.timeout = 10000;
 
 const AuthContext = createContext();
@@ -50,7 +48,7 @@ export function AuthProvider({ children }) {
         }
 
         // Get user profile to verify token
-        const response = await axios.get(`${API_URL}/api/user/profile`);
+        const response = await axios.get(`/api/user/profile`);
         setUser(response.data);
       } catch (error) {
         console.error("Token verification failed:", error);
@@ -141,7 +139,7 @@ export function AuthProvider({ children }) {
   const updateProfile = async (profileData) => {
     try {
       const response = await axios.put(
-        `${API_URL}/api/user/profile`,
+        `/api/user/profile`,
         profileData
       );
       setUser(response.data);
