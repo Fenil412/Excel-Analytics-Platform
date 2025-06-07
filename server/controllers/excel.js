@@ -1,3 +1,4 @@
+const XLSX = require("xlsx");
 const fs = require('fs');
 const path = require('path');
 const ExcelData = require('../models/ExcelData');
@@ -10,7 +11,21 @@ exports.uploadExcel = async (req, res) => {
     const { username } = req.body;
     if (!username) return res.status(400).json({ error: 'User ID is required' });
 
-    const { sheetData, sheetNames, totalRows, totalColumns } = parseExcelFile(req.file.path);
+    const filePath = req.file.path;
+    const workbook = XLSX.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+    if (jsonData.length === 0) {
+      fs.unlinkSync(filePath);
+      return res.status(400).json({ error: "Empty file" });
+    }
+
+    const headers = jsonData[0];
+    const rows = jsonData.slice(1);
+
+    const { sheetData, sheetNames, totalRows, totalColumns } = parseExcelFile(filePath);
 
     const excelDocument = new ExcelData({
       filename: req.file.filename,
@@ -21,11 +36,16 @@ exports.uploadExcel = async (req, res) => {
         fileSize: req.file.size,
         sheetNames,
         totalRows,
-        totalColumns
+        totalColumns,
+        headers,
+        rowCount: rows.length,
+        uploadedAt: new Date(),
       }
     });
 
     await excelDocument.save();
+    fs.unlinkSync(filePath); // cleanup after processing
+
     res.json({
       message: 'File uploaded and parsed successfully',
       fileId: excelDocument._id,
@@ -33,7 +53,7 @@ exports.uploadExcel = async (req, res) => {
       sheetNames
     });
   } catch (err) {
-    console.error(err);
+    console.error("Upload error:", err);
     res.status(500).json({ error: 'Server error during upload' });
   }
 };

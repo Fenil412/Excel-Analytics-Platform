@@ -10,7 +10,9 @@ const excelDataSchema = new mongoose.Schema({
     fileSize: Number,
     sheetNames: [String],
     totalRows: Number,
-    totalColumns: Number
+    totalColumns: Number,
+    headers: [String],
+    rowCount: Number
   }
 });
 
