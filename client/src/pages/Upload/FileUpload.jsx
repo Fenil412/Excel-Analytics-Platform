@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import { Upload, X, CheckCircle, AlertCircle, FileSpreadsheet, Loader } from "lucide-react"
 import { useExcel } from "../../contexts/ExcelContext"
+import { useAuth } from "../../contexts/AuthContext";
 
 const FileUpload = () => {
   const [files, setFiles] = useState([])
@@ -9,8 +10,8 @@ const FileUpload = () => {
   const [uploadProgress, setUploadProgress] = useState({})
   const { uploadFile, error, clearError } = useExcel()
 
-  // Get username from localStorage or context (adjust based on your auth implementation)
-  const username = localStorage.getItem('username') || 'demo_user'
+  const { user } = useAuth();
+  const username = user?.username || "User";
 
   const onDrop = useCallback((acceptedFiles) => {
     const newFiles = acceptedFiles.map((file) => ({
