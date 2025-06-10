@@ -30,24 +30,41 @@ const validate3DChartRequest = [
   handleValidationErrors,
 ]
 
-// Aggregate data validation rules
+// Enhanced aggregate data validation rules
 const validateAggregateRequest = [
-  body("groupBy").notEmpty().withMessage("Group by field is required"),
-  body("aggregateField").notEmpty().withMessage("Aggregate field is required"),
+  // For statistical charts, only column is required
+  body().custom((value, { req }) => {
+    const { chartType, column, groupBy, aggregateField } = req.body
+
+    // For statistical charts (histogram, boxplot)
+    if (chartType === "histogram" || chartType === "boxplot") {
+      if (!column) {
+        throw new Error("Column is required for statistical charts")
+      }
+      return true
+    }
+
+    // For regular aggregation charts
+    if (!groupBy) {
+      throw new Error("Group by field is required for aggregation charts")
+    }
+    if (!aggregateField) {
+      throw new Error("Aggregate field is required for aggregation charts")
+    }
+
+    return true
+  }),
   body("aggregateFunction")
     .optional()
-    .isIn(["sum", "avg", "count", "max", "min"])
+    .isIn(["sum", "avg", "average", "count", "max", "min", "median", "std", "stddev"])
     .withMessage("Invalid aggregate function"),
+  body("binCount").optional().isInt({ min: 5, max: 100 }).withMessage("Bin count must be between 5 and 100"),
+  body("limit").optional().isInt({ min: 1, max: 10000 }).withMessage("Limit must be between 1 and 10000"),
   handleValidationErrors,
 ]
 
 // Dataset ID validation
-const validateDatasetId = [
-  param("fileId")
-  .isMongoId()
-  .withMessage("Invalid dataset ID format"),
-handleValidationErrors,
-]
+const validateDatasetId = [param("fileId").isMongoId().withMessage("Invalid dataset ID format"), handleValidationErrors]
 
 module.exports = {
   validateChartRequest,
