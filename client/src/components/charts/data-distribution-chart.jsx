@@ -5,6 +5,9 @@ import {
   Download,
   AlertTriangle,
   BarChart3,
+  X,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useChart } from "../../contexts/ChartContext";
 import ChartConfigModal from "./chart-config-modal";
@@ -20,6 +23,7 @@ const DataDistributionChart = ({ selectedFileId, className = "" }) => {
   const [localLoading, setLocalLoading] = useState(false);
   const [headersLoading, setHeadersLoading] = useState(false);
   const [distributionStats, setDistributionStats] = useState(null);
+  const [showStatusMessages, setShowStatusMessages] = useState(true);
 
   useEffect(() => {
     if (selectedFileId) {
@@ -37,9 +41,7 @@ const DataDistributionChart = ({ selectedFileId, className = "" }) => {
         .then((result) => {
           console.log("Headers fetch completed:", result);
 
-          // Auto-generate default chart if we have valid data
           if (result && result.length > 0) {
-            // Find numeric columns for statistical analysis
             const numericHeaders = result.filter((h) =>
               ["numeric", "number", "float", "integer", "decimal"].includes(
                 h?.type || h?.dataType || "text"
@@ -49,7 +51,6 @@ const DataDistributionChart = ({ selectedFileId, className = "" }) => {
             if (numericHeaders.length > 0) {
               const yAxisColumn = numericHeaders[0]?.name;
 
-              // Auto-generate histogram for first numeric column
               const defaultConfig = {
                 chartType: "histogram",
                 yAxis: yAxisColumn,
@@ -87,7 +88,6 @@ const DataDistributionChart = ({ selectedFileId, className = "" }) => {
       return errors;
     }
 
-    // Validate headers are available
     if (!headers || headers.length === 0) {
       errors.push("No column headers available");
       return errors;
@@ -95,7 +95,6 @@ const DataDistributionChart = ({ selectedFileId, className = "" }) => {
 
     const headerNames = headers.map((h) => h?.name || h).filter(Boolean);
 
-    // Validate chart type specific requirements
     if (["histogram", "boxplot"].includes(config.chartType)) {
       if (!config.yAxis) {
         errors.push("Data column is required for statistical charts");
@@ -107,7 +106,6 @@ const DataDistributionChart = ({ selectedFileId, className = "" }) => {
         );
       }
     } else {
-      // Regular charts need both axes
       if (!config.xAxis) {
         errors.push("X-axis column is required");
       } else if (!headerNames.includes(config.xAxis)) {
@@ -178,7 +176,6 @@ const DataDistributionChart = ({ selectedFileId, className = "" }) => {
       return;
     }
 
-    // Validate configuration before making API call
     const validationErrors = validateConfig(config);
     if (validationErrors.length > 0) {
       const errorMessage =
@@ -200,7 +197,6 @@ const DataDistributionChart = ({ selectedFileId, className = "" }) => {
       let requestConfig;
 
       if (["histogram", "boxplot"].includes(config.chartType)) {
-        // For statistical charts, send column and chartType
         requestConfig = {
           column: config.yAxis,
           chartType: config.chartType,
@@ -208,7 +204,6 @@ const DataDistributionChart = ({ selectedFileId, className = "" }) => {
           limit: config.limit || 1000,
         };
       } else {
-        // For regular charts, use aggregation
         requestConfig = {
           groupBy: config.xAxis,
           aggregateField: config.yAxis,
@@ -233,7 +228,6 @@ const DataDistributionChart = ({ selectedFileId, className = "" }) => {
 • Column names match exactly (case-sensitive)`);
         }
 
-        // Process the data
         const chartResult = {
           data: {
             labels: result.data.map(
@@ -264,7 +258,6 @@ const DataDistributionChart = ({ selectedFileId, className = "" }) => {
       }
     } catch (err) {
       console.error("Error generating distribution chart:", err);
-      // Error is already handled in the context
     } finally {
       setLocalLoading(false);
     }
@@ -354,6 +347,23 @@ const DataDistributionChart = ({ selectedFileId, className = "" }) => {
           Data Distribution Analysis
         </h3>
         <div className="flex space-x-2">
+          {/* Toggle Status Messages Button */}
+          <button
+            onClick={() => setShowStatusMessages(!showStatusMessages)}
+            className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+            title={
+              showStatusMessages
+                ? "Hide Status Messages"
+                : "Show Status Messages"
+            }
+          >
+            {showStatusMessages ? (
+              <EyeOff className="h-4 w-4" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+          </button>
+
           {chartData && (
             <>
               <button
@@ -388,30 +398,59 @@ const DataDistributionChart = ({ selectedFileId, className = "" }) => {
         </div>
       </div>
 
-      {/* Headers Status */}
-      {selectedFileId && headersLoading && (
-        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-          <p className="text-sm text-blue-600 dark:text-blue-400">
-            Loading column headers...
-          </p>
-        </div>
-      )}
+      {/* Collapsible Status Messages */}
+      {showStatusMessages && (
+        <div className="space-y-2 mb-4">
+          {/* Headers Status */}
+          {selectedFileId && headersLoading && (
+            <div className="p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-blue-600 dark:text-blue-400">
+                  Loading column headers...
+                </p>
+                <button
+                  onClick={() => setShowStatusMessages(false)}
+                  className="text-blue-400 hover:text-blue-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          )}
 
-      {selectedFileId && !headersLoading && headers.length === 0 && (
-        <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
-          <p className="text-sm text-yellow-600 dark:text-yellow-400">
-            No headers found. Please check if the file contains valid data or
-            try refreshing.
-          </p>
-        </div>
-      )}
+          {selectedFileId && !headersLoading && headers.length === 0 && (
+            <div className="p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                  No headers found. Please check if the file contains valid
+                  data.
+                </p>
+                <button
+                  onClick={() => setShowStatusMessages(false)}
+                  className="text-yellow-400 hover:text-yellow-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          )}
 
-      {selectedFileId && !headersLoading && headers.length > 0 && (
-        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
-          <p className="text-sm text-green-600 dark:text-green-400">
-            Found {headers.length} columns:{" "}
-            {headers.map((h) => h?.name || h || "Unknown").join(", ")}
-          </p>
+          {selectedFileId && !headersLoading && headers.length > 0 && (
+            <div className="p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-green-600 dark:text-green-400">
+                  Found {headers.length} columns:{" "}
+                  {headers.map((h) => h?.name || h || "Unknown").join(", ")}
+                </p>
+                <button
+                  onClick={() => setShowStatusMessages(false)}
+                  className="text-green-400 hover:text-green-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -467,36 +506,42 @@ const DataDistributionChart = ({ selectedFileId, className = "" }) => {
         )}
       </div>
 
-      {/* Distribution Statistics */}
+      {/* Enhanced Distribution Statistics with Fixed CSS */}
       {distributionStats && (
         <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
           <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
             Distribution Statistics
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-              <p className="text-xs text-gray-600 dark:text-gray-400">Count</p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg h-auto min-h-[80px] flex flex-col">
+              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-2 whitespace-nowrap overflow-hidden text-ellipsis">
+                Count
+              </p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white break-words">
                 {distributionStats.count}
               </p>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-              <p className="text-xs text-gray-600 dark:text-gray-400">Mean</p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg h-auto min-h-[80px] flex flex-col">
+              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-2 whitespace-nowrap overflow-hidden text-ellipsis">
+                Mean
+              </p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white break-words">
                 {distributionStats.mean}
               </p>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-              <p className="text-xs text-gray-600 dark:text-gray-400">Median</p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white">
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg h-auto min-h-[80px] flex flex-col">
+              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-2 whitespace-nowrap overflow-hidden text-ellipsis">
+                Median
+              </p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white break-words">
                 {distributionStats.median}
               </p>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-              <p className="text-xs text-gray-600 dark:text-gray-400">
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg h-auto min-h-[80px] flex flex-col">
+              <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-2 whitespace-nowrap overflow-hidden text-ellipsis">
                 Std Dev
               </p>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white">
+              <p className="text-xl font-bold text-gray-900 dark:text-white break-words">
                 {distributionStats.stdDev}
               </p>
             </div>
