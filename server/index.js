@@ -50,6 +50,13 @@ const adminRoutes = require("./routes/admin")
 const excelRoutes = require('./routes/excel');
 const chartsRoutes = require('./routes/charts');
 
+const chartHistoryRoutes = require('./routes/chartHistory');
+const chartDownloadRoutes = require('./routes/chartDownload');
+
+// Add the new routes
+app.use('/api/charts', chartHistoryRoutes);
+app.use('/api/charts', chartDownloadRoutes);
+
 app.use("/api/auth", authRoutes)
 app.use("/api/user", userRoutes)
 app.use("/api/admin", adminRoutes)
