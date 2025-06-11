@@ -5,6 +5,7 @@ const { ChartJSNodeCanvas } = require("chartjs-node-canvas")
 const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
 const ChartExportUtils = require('../utils/ChartExportUtils'); // Assuming you have a utility for chart data validation
+const puppeteer = require('puppeteer');
 
 class ChartDownloadController {
   constructor() {
@@ -33,33 +34,72 @@ class ChartDownloadController {
       });
     }
 
-    console.log('Validating chartConfig');
-    ChartExportUtils.validateChartData(chartConfig.data, chartConfig.type);
-
-    console.log('Initializing chartJSNodeCanvas');
-    const chartJSNodeCanvas = new ChartJSNodeCanvas({
-      width: parseInt(width),
-      height: parseInt(height),
-      backgroundColour: 'white'
+    // Launch headless browser
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
-    console.log('Rendering chart to buffer');
-    const imageBuffer = await chartJSNodeCanvas.renderToBuffer(chartConfig, format);
-    console.log('Chart rendered, buffer length:', imageBuffer.length);
+    const page = await browser.newPage();
+    
+    // Set viewport
+    await page.setViewport({
+      width: parseInt(width),
+      height: parseInt(height),
+      deviceScaleFactor: 2 // For better quality
+    });
 
-    const filename = `chart_${title || 'export'}_${Date.now()}.${format}`;
+    // Create HTML template with chart
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+          <style>
+            body { margin: 0; display: flex; justify-content: center; align-items: center; }
+            canvas { max-width: 100%; height: auto; }
+          </style>
+        </head>
+        <body>
+          <canvas id="chart"></canvas>
+          <script>
+            const ctx = document.getElementById('chart').getContext('2d');
+            new Chart(ctx, ${JSON.stringify(chartConfig)});
+          </script>
+        </body>
+      </html>
+    `;
+
+    await page.setContent(htmlContent);
+    
+    // Wait for chart to render
+    await page.waitForSelector('canvas');
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Additional wait for animations
+
+    // Capture the screenshot
+    const screenshot = await page.screenshot({
+      type: format,
+      omitBackground: true,
+      clip: {
+        x: 0,
+        y: 0,
+        width: parseInt(width),
+        height: parseInt(height)
+      }
+    });
+
+    await browser.close();
+
+    // Send response
     res.setHeader('Content-Type', `image/${format}`);
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.setHeader('Content-Length', imageBuffer.length);
+    res.setHeader('Content-Disposition', `attachment; filename=chart.${format}`);
+    return res.send(screenshot);
 
-    console.log('Sending response');
-    res.send(imageBuffer);
   } catch (error) {
     console.error('Error generating chart image:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to generate chart image',
-      error: error.message
+    return res.status(500).json({
+      error: 'Failed to generate chart image',
+      details: error.message
     });
   }
 }
