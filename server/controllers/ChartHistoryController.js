@@ -22,7 +22,8 @@ class ChartHistoryController {
         analysisMetadata,
         title,
         description,
-        tags
+        tags,
+        isFavorite
       } = req.body;
 
       const chartHistory = new ChartHistory({
@@ -33,7 +34,8 @@ class ChartHistoryController {
         analysisMetadata,
         title: title || `${chartType} Chart - ${new Date().toLocaleDateString()}`,
         description: description || '',
-        tags: tags || []
+        tags: tags || [],
+        isFavorite: isFavorite || false
       });
 
       const savedHistory = await chartHistory.save();

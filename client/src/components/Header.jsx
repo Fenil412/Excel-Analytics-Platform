@@ -48,6 +48,9 @@ const Header = () => {
               <Link to="/analytics" className="text-sm font-medium hover:text-primary">
                 Analytics
               </Link>
+              <Link to="/history" className="text-sm font-medium hover:text-primary">
+                History
+              </Link>
               <Link to="/settings" className="text-sm font-medium hover:text-primary">
                 Settings
               </Link>
