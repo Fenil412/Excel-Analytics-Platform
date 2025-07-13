@@ -4,7 +4,8 @@ import { useToast } from "../components/ui/use-toast"
 import { Users, Trash2, Shield } from "lucide-react"
 import axios from "axios"
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001"
+const API_URL = import.meta.env.VITE_API_URL || "https://excel-analytics-platform-0fk8.onrender.com";
+
 
 const AdminPage = () => {
   const { user } = useAuth()

@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useCallback  } from "react"
 import axios from "axios"
 
 // Add axios configuration
-axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || "https://excel-analytics-platform-0fk8.onrender.com";
 axios.defaults.timeout = 10000;
 
 const ExcelContext = createContext()
