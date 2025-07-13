@@ -4,7 +4,7 @@ const { createCanvas } = require('canvas');
 const { ChartJSNodeCanvas } = require("chartjs-node-canvas")
 const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
-const ChartExportUtils = require('../utils/ChartExportUtils'); // Assuming you have a utility for chart data validation
+const ChartExportUtils = require('../utils/chartExportUtils'); // Assuming you have a utility for chart data validation
 const puppeteer = require('puppeteer');
 
 class ChartDownloadController {
