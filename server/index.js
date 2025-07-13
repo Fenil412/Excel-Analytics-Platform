@@ -9,7 +9,7 @@ dotenv.config()
 
 const app = express()
 
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "http://localhost:5173"
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || "https://excel-analytics-2025.netlify.app"
 
 connectDB();
 
@@ -17,7 +17,7 @@ app.use(express.json({ limit: "50mb" }))
 app.use(express.urlencoded({ extended: true, limit: "50mb" }))
 app.use(
   cors({
-    origin: [FRONTEND_ORIGIN, "http://localhost:3000", "http://127.0.0.1:5173"],
+    origin: [FRONTEND_ORIGIN, "https://excel-analytics-platform-0fk8.onrender.com", "https://excel-analytics-2025.netlify.app"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
