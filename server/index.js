@@ -17,7 +17,7 @@ app.use(express.json({ limit: "50mb" }))
 app.use(express.urlencoded({ extended: true, limit: "50mb" }))
 app.use(
   cors({
-    origin: [FRONTEND_ORIGIN, "https://excel-analytics-platform-0fk8.onrender.com", "https://excel-analytics-2025.netlify.app"],
+    origin: [FRONTEND_ORIGIN, "https://excel-analytics-2025.netlify.app"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
